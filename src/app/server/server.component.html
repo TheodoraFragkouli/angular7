@@ -5,6 +5,9 @@
     <title>Server component</title>
 </head>
 <body>
-<p [ngStyle]="{backgroundColor: getColor()}">Server with ID {{serverId}} is now {{getServerStatus()}}</p>
+<p [ngStyle]="{backgroundColor: getColor()}"
+[ngClass]="{online: serverStatus === 'online'}">
+  Server with ID {{serverId}} is now {{getServerStatus()}}
+</p>
 </body>
 </html>
