@@ -3,7 +3,7 @@ import {RecipeService} from "../recipes/recipe.service";
 import {map} from "rxjs/operators";
 import {Recipe} from "../recipes/recipe.model";
 import {AuthService} from "../auth/auth.service";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams, HttpRequest} from "@angular/common/http";
 
 @Injectable()
 export class DataStorageService {
@@ -13,27 +13,32 @@ export class DataStorageService {
   }
 
   storeRecipes() {
-    const token = this.authService.getToken();
-    return this.httpClient.put('https://udemy-ng-26e8a.firebaseio.com/recipes.json?auth=' + token,
-      this.recipeService.getRecipes());
+    // return this.httpClient.put('https://udemy-ng-26e8a.firebaseio.com/recipes.json',
+    //   this.recipeService.getRecipes(), {
+    //   observe: 'body',
+    //   // headers: new HttpHeaders().set('Authorization', '')
+    //     params: new HttpParams().set('auth', token)
+    //   });
+    const req = new HttpRequest('PUT', 'https://udemy-ng-26e8a.firebaseio.com/recipes.json',
+      this.recipeService.getRecipes(),
+      {reportProgress: true});
+    return this.httpClient.request(req);
   }
 
   getRecipes() {
-    const token = this.authService.getToken();
     // this.httpClient.get<Recipe[]>('https://udemy-ng-26e8a.firebaseio.com/recipes.json?auth=' + token)
-    this.httpClient.get<Recipe[]>('https://udemy-ng-26e8a.firebaseio.com/recipes.json?auth=' + token, {
-      observe: 'response',
+    this.httpClient.get<Recipe[]>('https://udemy-ng-26e8a.firebaseio.com/recipes.json', {
+      observe: 'body',
       responseType: 'json'
     })
       .pipe(map((recipes) => {
-        // for (let recipe of recipes) {
-        //   if (!recipe['ingredients']) {
-        //     console.log(recipe);
-        //     recipe['ingredients'] = [];
-        //   }
-        // }
-        // return recipes;
-        return [];
+        for (let recipe of recipes) {
+          if (!recipe['ingredients']) {
+            console.log(recipe);
+            recipe['ingredients'] = [];
+          }
+        }
+        return recipes;
       }))
       .subscribe((recipes: Recipe[]) => {
         this.recipeService.setRecipes(recipes);
